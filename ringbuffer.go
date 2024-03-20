@@ -1,6 +1,9 @@
 package main
 
-import "errors"
+import (
+	"errors"
+	"sync"
+)
 
 /*
 Features of RingBuffer
@@ -14,6 +17,7 @@ var (
 )
 
 type RingBuffer struct {
+	mx  sync.Mutex
 	arr []int
 
 	read  int
@@ -32,6 +36,9 @@ func NewRingBuffer(size int) RingBuffer {
 }
 
 func (b *RingBuffer) Write(data int) error {
+	b.mx.Lock()
+	defer b.mx.Unlock()
+
 	if b.isBufferFull() {
 		return ErrBufferFull
 	}
@@ -44,6 +51,9 @@ func (b *RingBuffer) Write(data int) error {
 }
 
 func (b *RingBuffer) Read() (int, error) {
+	b.mx.Lock()
+	defer b.mx.Unlock()
+
 	if b.isEmpty == true {
 		return 0, ErrBufferEmpty
 	}
